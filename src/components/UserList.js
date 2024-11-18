@@ -19,12 +19,15 @@ const UserList = ({ setUserToEdit, setRefresh }) => {
   return (
     <div>
       <h2>User List</h2>
-      <button onClick={() => setUserToEdit(null)}>Add User</button>
+      <button onClick={() => setUserToEdit({ firstName: '', lastName: '', email: '', department: '' })}>Add User</button>
       <ul>
         {users.map(user => (
           <li key={user.id}>
             {user.name} ({user.email}) - {user.department}
-            <button onClick={() => setUserToEdit(user)}>Edit</button>
+            <button onClick={() => {
+              const [firstName, lastName] = user.name.split(' ');
+              setUserToEdit({ ...user, firstName, lastName });
+            }}>Edit</button>
             <button onClick={() => deleteUser(user.id)}>Delete</button>
           </li>
         ))}

@@ -4,7 +4,7 @@ import UserForm from './components/UserForm';
 
 const App = () => {
   const [userToEdit, setUserToEdit] = useState(null);
-  const [setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   return (
     <div className="container">
