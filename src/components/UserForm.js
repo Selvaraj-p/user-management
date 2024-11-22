@@ -1,100 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
 
-const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
-
-const UserForm = ({ userToEdit, setRefresh }) => {
+function UserForm({ addUser, updateUser, editingUser, setEditingUser, departments }) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    department: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    companyName: "",
+    department: "",
   });
 
+  // Populate form with user data when editing
   useEffect(() => {
-    if (userToEdit) {
+    if (editingUser) {
+      const [firstName, lastName] = editingUser.name.split(" ");
       setFormData({
-        firstName: userToEdit.firstName || '',
-        lastName: userToEdit.lastName || '',
-        email: userToEdit.email || '',
-        department: userToEdit.department || '',
+        firstName,
+        lastName,
+        email: editingUser.email,
+        companyName: editingUser.company.name,
+        department: editingUser.department || "",
       });
-    } else {
-      setFormData({ firstName: '', lastName: '', email: '', department: '' });
     }
-  }, [userToEdit]);
+  }, [editingUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const url = userToEdit && userToEdit.id
-      ? `https://jsonplaceholder.typicode.com/users/${userToEdit.id}`
-      : 'https://jsonplaceholder.typicode.com/users';
-    const method = userToEdit && userToEdit.id ? 'put' : 'post';
+    if (editingUser) {
+      updateUser({ ...formData, id: editingUser.id });
+      setEditingUser(null);
+    } else {
+      addUser(formData);
+    }
+    setFormData({ firstName: "", lastName: "", email: "", companyName: "", department: "" });
+  };
 
-    axios({
-      method: method,
-      url: url,
-      data: {
-        ...formData,
-        name: `${formData.firstName} ${formData.lastName}`,
-      },
-    })
-      .then(() => {
-        setRefresh((prev) => !prev);
-      })
-      .catch((error) => console.error('Error saving user:', error));
+  const handleCancel = () => {
+    setEditingUser(null);
+    setFormData({ firstName: "", lastName: "", email: "", companyName: "", department: "" });
   };
 
   return (
     <div>
-      <h2>{userToEdit && userToEdit.id ? 'Edit User' : 'Add User'}</h2>
+      <h2>{editingUser ? "Edit User" : "Add User"}</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleInputChange}
-          placeholder="First Name"
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleInputChange}
-          placeholder="Last Name"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="Email"
-          required
-        />
-        <select
-          name="department"
-          value={formData.department}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="" disabled>Select Department</option>
-          {departments.map(department => (
-            <option key={department} value={department}>
-              {department}
-            </option>
-          ))}
-        </select>
-        <button type="submit">{userToEdit && userToEdit.id ? 'Update' : 'Add'}</button>
+        <label>
+          First Name:
+          <input
+            type="text"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleInputChange}
+            required
+          />
+        </label>
+        <br />
+        <label>
+          Last Name:
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            required
+          />
+        </label>
+        <br />
+        <label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+          />
+        </label>
+        <br />
+        <label>
+          Company:
+          <input
+            type="text"
+            name="companyName"
+            value={formData.companyName}
+            onChange={handleInputChange}
+            required
+          />
+        </label>
+        <br />
+        <label>
+          Department:
+          <select
+            name="department"
+            value={formData.department}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="">Select Department</option>
+            {departments.map((dept, index) => (
+              <option key={index} value={dept}>
+                {dept}
+              </option>
+            ))}
+          </select>
+        </label>
+        <br />
+        <button type="submit">{editingUser ? "Update" : "Add"}</button>
+        <button type="button" onClick={handleCancel}>
+          Cancel
+        </button>
       </form>
     </div>
   );
-};
+}
 
 export default UserForm;
